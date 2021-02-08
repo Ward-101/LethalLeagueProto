@@ -5,6 +5,7 @@ namespace PlayerController
 {
     public class Scr_PlayerGroundMovement : MonoBehaviour
     {
+        #region Variables
         [Header("Edit")]
         public float moveSpeed;
         public float crouchDrag;
@@ -13,6 +14,9 @@ namespace PlayerController
         [SerializeField] private bool isRight;
         [SerializeField] private bool isLeft;
         [SerializeField] private bool isDown;
+
+        [Header("Current Player States")]
+        [SerializeField] private bool isGrounded;
 
         [Header("States Restriction")]
         public bool canRun = true;
@@ -25,7 +29,7 @@ namespace PlayerController
         private Rigidbody2D playerRb;
         private Animator playerAnimator;
         private float lastVelocity; //For Idle Animation
-        
+        #endregion
 
         private void Start()
         {
@@ -35,6 +39,8 @@ namespace PlayerController
 
         private void Update()
         {
+            GetVariable();
+
             GetInput();
             StatesManager();
         }
@@ -54,17 +60,20 @@ namespace PlayerController
 
         private void StatesManager()
         {
-            if ((isRight  || isLeft) && !isDown && canRun)
+            if (isGrounded)
             {
-                RunState();
-            }
-            else if (!isRight && !isLeft && !isDown)
-            {
-                IdleState();
-            }
-            else if (isDown && canCrouch)
-            {
-                CrouchState();
+                if ((isRight || isLeft) && !isDown && canRun)
+                {
+                    RunState();
+                }
+                else if (!isRight && !isLeft && !isDown)
+                {
+                    IdleState();
+                }
+                else if (isDown && canCrouch)
+                {
+                    CrouchState();
+                }
             }
         }
 
@@ -75,7 +84,7 @@ namespace PlayerController
             {
                lastVelocity = playerRb.velocity.x;
             }
-            playerRb.velocity = Vector2.zero; //Add gravity
+            playerRb.velocity = new Vector2(0f, playerRb.velocity.y) ;
 
             //Anim
             if (lastVelocity > 0f)
@@ -98,7 +107,7 @@ namespace PlayerController
             if (isRight)
             {
                 //Behavior
-                playerRb.velocity = new Vector2(moveSpeed, 0f); // Add gravity
+                playerRb.velocity = new Vector2(moveSpeed, playerRb.velocity.y);
 
                 //Anim
                 playerAnimator.Play("ACl_PlayerRun");
@@ -106,7 +115,7 @@ namespace PlayerController
             else
             {
                 //Behavior
-                playerRb.velocity = new Vector2(-moveSpeed, 0f); // Add gravity
+                playerRb.velocity = new Vector2(-moveSpeed, playerRb.velocity.y);
 
                 //Anim
                 playerAnimator.Play("ACl_PlayerRunFlip");
@@ -115,7 +124,7 @@ namespace PlayerController
 
         private void CrouchState()
         {
-            //Behaviror
+            //Behavior
             playerRb.drag = crouchDrag;
 
             //Anim
@@ -143,6 +152,12 @@ namespace PlayerController
                 }
             }
         }
+
+        private void GetVariable()
+        {
+            isGrounded = GetComponent<Scr_PlayerAirMovement>().isGrounded;
+        }
+
     }
 }
 
