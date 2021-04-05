@@ -7,13 +7,18 @@ namespace PlayerController
     {
         #region Variables
         [Header("Edit")]
+        //Ground
         public float moveSpeed;
         public float crouchDrag;
+        //Jump
+        public float jumpForce;
+        public float airDrag;
 
         [Header("Current Input States")]
         [SerializeField] private bool isRight;
         [SerializeField] private bool isLeft;
         [SerializeField] private bool isDown;
+        [SerializeField] private bool aIsPressed;
 
         [Header("Current Player States")]
         [SerializeField] private bool isGrounded;
@@ -21,6 +26,7 @@ namespace PlayerController
         [Header("States Restriction")]
         public bool canRun = true;
         public bool canCrouch = true;
+        public bool canJump = true;
 
         [Header("Debug")]
         [SerializeField] private Vector2 AxisValues;
@@ -39,8 +45,6 @@ namespace PlayerController
 
         private void Update()
         {
-            GetVariable();
-
             GetInput();
             StatesManager();
         }
@@ -56,17 +60,17 @@ namespace PlayerController
             isLeft = Input.GetAxis("P1_Horizontal") <= -1f;
 
             isDown = Input.GetAxis("P1_Vertical") <= -1f;
+
+            aIsPressed = Input.GetButtonDown("P1_A");
         }
+
+        
 
         private void StatesManager()
         {
             if (isGrounded)
             {
-                if ((isRight || isLeft) && !isDown && canRun)
-                {
-                    RunState();
-                }
-                else if (!isRight && !isLeft && !isDown)
+                if (!isRight && !isLeft && !isDown)
                 {
                     IdleState();
                 }
@@ -74,6 +78,16 @@ namespace PlayerController
                 {
                     CrouchState();
                 }
+
+                if (aIsPressed && canJump && !isDown)
+                {
+                    JumpState();
+                }
+            }
+
+            if ((isRight || isLeft) && !isDown && canRun)
+            {
+                RunState();
             }
         }
 
@@ -110,7 +124,22 @@ namespace PlayerController
                 playerRb.velocity = new Vector2(moveSpeed, playerRb.velocity.y);
 
                 //Anim
-                playerAnimator.Play("ACl_PlayerRun");
+                if (isGrounded)
+                {
+                    playerAnimator.Play("ACl_PlayerRun");
+                }
+                else
+                {
+                    if (playerRb.velocity.y > 0f)
+                    {
+                        playerAnimator.Play("ACl_PlayerJump");
+                    }
+                    else
+                    {
+                        playerAnimator.Play("ACl_PlayerFall");
+                    }
+                }
+                
             }
             else
             {
@@ -118,7 +147,22 @@ namespace PlayerController
                 playerRb.velocity = new Vector2(-moveSpeed, playerRb.velocity.y);
 
                 //Anim
-                playerAnimator.Play("ACl_PlayerRunFlip");
+                if (isGrounded)
+                {
+                    playerAnimator.Play("ACl_PlayerRunFlip");
+                }
+                else
+                {
+                    if (playerRb.velocity.y > 0f)
+                    {
+                        playerAnimator.Play("ACl_PlayerJumpFlip");
+                    }
+                    else
+                    {
+                        playerAnimator.Play("ACl_PlayerFallFlip");
+                    }
+                }
+                
             }
         }
 
@@ -153,10 +197,28 @@ namespace PlayerController
             }
         }
 
-        private void GetVariable()
+        private void JumpState()
         {
-            isGrounded = GetComponent<Scr_PlayerAirMovement>().isGrounded;
+            playerRb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
+
+        #region collisonEvents
+        private void OnCollisionEnter2D(Collision2D other)
+        {
+            if (other.collider.gameObject.layer == 8 && !isGrounded)
+            {
+                isGrounded = true;
+            }
+        }
+
+        private void OnCollisionExit2D(Collision2D other)
+        {
+            if (other.collider.gameObject.layer == 8 && isGrounded)
+            {
+                isGrounded = false;
+            }
+        }
+        #endregion
 
     }
 }
