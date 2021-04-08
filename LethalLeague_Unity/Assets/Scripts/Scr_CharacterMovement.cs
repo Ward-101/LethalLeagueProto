@@ -6,10 +6,13 @@ using UnityEngine;
 public class Scr_CharacterMovement : MonoBehaviour
 {
     [Header("Edit")]
-    [SerializeField] private float speed = 9;
-    [SerializeField] private float slideDeceleration = 70;
-    [SerializeField] private float jumpHeight = 4;
-    [SerializeField] private float gravityScale = 1;
+    [SerializeField] private float speed = 9f;
+    [SerializeField] private float slideDeceleration = 70f;
+    [SerializeField] private float jumpHeight = 4f;
+    [SerializeField] private float gravityScale = 1f;
+    [SerializeField] private float lowJumpGravityModifier = 1f;
+    [SerializeField] private float fallGravityModifier = 1f;
+    [SerializeField] private float forceFallGravityModifier = 1f;
 
     [Header("Inputs")]
     [SerializeField] private float horizontalInput;
@@ -18,8 +21,12 @@ public class Scr_CharacterMovement : MonoBehaviour
 
     [Header("States")]
     [SerializeField] private bool isGrounded;
+    [SerializeField] private bool isJumping;
+    [SerializeField] private bool isFalling;
+    [SerializeField] private bool isIdle;
     [SerializeField] private bool isRun;
     [SerializeField] private bool isCrouch;
+    [SerializeField] private bool isWallRide;
 
 
     private BoxCollider2D boxCollider;
@@ -35,14 +42,14 @@ public class Scr_CharacterMovement : MonoBehaviour
         GetInput();
 
         Jump();
-
         Run();
-
         Crouch();
 
         transform.Translate(velocity * Time.deltaTime);
 
         CollisionDetection();
+
+        Idle();
     }
 
     private void GetInput()
@@ -60,7 +67,7 @@ public class Scr_CharacterMovement : MonoBehaviour
             horizontalInput = 0f;
         }
 
-        jumpInput = Input.GetButtonDown("P1_A");
+        jumpInput = Input.GetButton("P1_A");
 
         if (Input.GetAxisRaw("P1_Vertical") >= 1f)
         {
@@ -75,6 +82,18 @@ public class Scr_CharacterMovement : MonoBehaviour
             verticalInput = 0f;
         }
 
+    }
+
+    private void Idle()
+    {
+        if (!isRun && !isCrouch && !isWallRide && !isJumping && !isFalling)
+        {
+            isIdle = true;
+        }
+        else
+        {
+            isIdle = false;
+        }
     }
 
     private void Run()
@@ -112,17 +131,41 @@ public class Scr_CharacterMovement : MonoBehaviour
 
             if (jumpInput)
             {
+                isGrounded = false;
                 velocity.y = Mathf.Sqrt(2 * jumpHeight * Mathf.Abs(Physics2D.gravity.y * gravityScale));
             }
         }
 
-        velocity.y += Physics2D.gravity.y * gravityScale * Time.deltaTime;
+        if (!isGrounded)
+        {
+            float gravityModifier;
+
+            if (velocity.y < 0)
+            {
+                gravityModifier = fallGravityModifier;
+            }
+            else if (velocity.y > 0 && !jumpInput)
+            {
+                gravityModifier = lowJumpGravityModifier;
+            }
+            else
+            {
+                gravityModifier = 1f;
+            }
+
+            if (verticalInput == -1f)
+            {
+                gravityModifier = forceFallGravityModifier;
+            }
+
+            velocity.y += Physics2D.gravity.y * gravityScale * gravityModifier * Time.deltaTime;
+        }
+
     }
 
     private void CollisionDetection()
     {
         Collider2D[] hits = Physics2D.OverlapBoxAll(transform.position, boxCollider.size, 0);
-        isGrounded = false;
 
         foreach (Collider2D hit in hits)
         {
@@ -140,6 +183,15 @@ public class Scr_CharacterMovement : MonoBehaviour
                 if (Vector2.Angle(colliderDistance.normal, Vector2.up) < 90 && velocity.y < 0)
                 {
                     isGrounded = true;
+                }
+
+                if (Vector2.Angle(colliderDistance.normal, Vector2.left) < 90 && horizontalInput == -1 && !isGrounded)
+                {
+                    isWallRide = true;
+                }
+                else
+                {
+                    isWallRide = false;
                 }
             }
         }
