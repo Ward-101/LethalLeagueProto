@@ -42,7 +42,7 @@ public class Scr_CharacterMovement : MonoBehaviour
         GetInput();
 
         Jump();
-        Run();
+        HorizontalMovement();
         Crouch();
 
         transform.Translate(velocity * Time.deltaTime);
@@ -96,9 +96,9 @@ public class Scr_CharacterMovement : MonoBehaviour
         }
     }
 
-    private void Run()
+    private void HorizontalMovement()
     {
-        if (!isCrouch)
+        if (!isCrouch /*&& horizontalInput != 0*/)
         {
             isRun = true;
             velocity.x = speed * horizontalInput;
@@ -185,7 +185,7 @@ public class Scr_CharacterMovement : MonoBehaviour
                     isGrounded = true;
                 }
 
-                if (Vector2.Angle(colliderDistance.normal, Vector2.left) < 90 && horizontalInput == -1 && !isGrounded)
+                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) < 90 && horizontalInput == -1) || (Vector2.Angle(colliderDistance.normal, Vector2.left) < 90 && horizontalInput == 1)) && !isGrounded)
                 {
                     isWallRide = true;
                 }
