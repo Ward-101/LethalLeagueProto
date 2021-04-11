@@ -5,13 +5,13 @@ using UnityEngine;
 [RequireComponent(typeof(Animator), typeof(Scr_CharacterMovement))]
 public class Scr_CharacterAnimations : MonoBehaviour
 {
+    #region Variables
     [Header("Edit")]
     [SerializeField, Range(0f, 10f)] private float fallAnimCorrection = 0f;
 
     private Animator animator;
     private Scr_CharacterMovement movement;
-
-    
+    #endregion
 
     private void Awake()
     {
@@ -106,7 +106,7 @@ public class Scr_CharacterAnimations : MonoBehaviour
 
     private void Jump()
     {
-        if (movement.velocity.y > fallAnimCorrection)
+        if (movement.velocity.y > fallAnimCorrection || movement.isWallJump)
         {
             if (movement.velocity.x > 0)
             {

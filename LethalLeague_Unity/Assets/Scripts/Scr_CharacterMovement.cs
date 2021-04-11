@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class Scr_CharacterMovement : MonoBehaviour
@@ -13,6 +11,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     [SerializeField] private float jumpHeight = 4f;
     [SerializeField] private Vector2 wallJumpForce = new Vector2(3f, 3f);
     [SerializeField] private float wallJumpDuration = 0.5f;
+    [SerializeField] private float wallRideCooldown = 0.5f;
     [SerializeField] private float gravityScale = 1f;
     [SerializeField] private float highJumpGravityModifier = 1f;
     [SerializeField] private float fallGravityModifier = 1f;
@@ -23,6 +22,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     [Header("Inputs")]
     public float horizontalInput;
     [SerializeField] private bool jumpInput;
+    [SerializeField] private bool wallJumpInput;
     [SerializeField] private float verticalInput;
 
     [Header("States")]
@@ -33,17 +33,22 @@ public class Scr_CharacterMovement : MonoBehaviour
     public bool isCrouch;
     public bool isWallRide;
     public bool isWallJump;
-
-
-    [HideInInspector] public float lastXVelocity = 0f;
+    
     private BoxCollider2D boxCollider;
     [HideInInspector] public Vector2 velocity;
+
+    [HideInInspector] public float lastXVelocity = 0f;
+    private float lastHorizontalInput = 0f;
+
     private bool lockGravity = false;
     private bool lockCrouch = false;
     private bool canCrouch = true;
+    private bool canWallRide = true;
+
     private float currentCrouchTime = 0f;
     private float currentWallJumpTime = 0f;
-    private float lastHorizontalInput = 0f;
+    private float currentWallRideElapsedTime = 0f;
+    private float wallRideSide = 0f;
     #endregion
 
     private void Awake()
@@ -56,9 +61,11 @@ public class Scr_CharacterMovement : MonoBehaviour
         GetInput();
 
         Jump();
+        WallRide();
+        Gravity();
         HorizontalMovement();
         Crouch();
-
+        
         transform.Translate(velocity * Time.deltaTime);
 
         CollisionDetection();
@@ -81,8 +88,6 @@ public class Scr_CharacterMovement : MonoBehaviour
             horizontalInput = 0f;
         }
 
-        jumpInput = Input.GetButton("P1_A");
-
         if (Input.GetAxisRaw("P1_Vertical") >= 1f)
         {
             verticalInput = 1f;
@@ -96,6 +101,9 @@ public class Scr_CharacterMovement : MonoBehaviour
             verticalInput = 0f;
         }
 
+        jumpInput = Input.GetButton("P1_A");
+
+        wallJumpInput = Input.GetButtonDown("P1_A");
     }
 
     private void Idle()
@@ -127,7 +135,7 @@ public class Scr_CharacterMovement : MonoBehaviour
 
     private void Crouch()
     {
-        if (!canCrouch && verticalInput != -1)
+        if (!canCrouch && verticalInput != -1f)
         {
             canCrouch = true;
         }
@@ -144,7 +152,7 @@ public class Scr_CharacterMovement : MonoBehaviour
                 lockCrouch = false;
             }
 
-            velocity.x = Mathf.MoveTowards(velocity.x, 0, slideDeceleration * Time.deltaTime);
+            velocity.x = Mathf.MoveTowards(velocity.x, 0f, slideDeceleration * Time.deltaTime);
         }
         else
         {
@@ -165,7 +173,8 @@ public class Scr_CharacterMovement : MonoBehaviour
                 velocity.y = Mathf.Sqrt(2 * jumpHeight * Mathf.Abs(Physics2D.gravity.y * gravityScale));
             }
         }
-        else if ((isWallRide && jumpInput) || isWallJump)
+
+        if ((wallJumpInput && isWallRide) || isWallJump)
         {
             if (!isWallJump)
             {
@@ -185,56 +194,76 @@ public class Scr_CharacterMovement : MonoBehaviour
             velocity.y = Mathf.Sqrt(2 * wallJumpForce.y * Mathf.Abs(Physics2D.gravity.y * gravityScale));
             velocity.x = wallJumpForce.x * -lastHorizontalInput;
         }
+    }
 
-        if (!isGrounded)
+    private void WallRide()
+    {
+        if (isWallRide)
         {
-            Gravity();
+            if (wallRideSide != horizontalInput)
+            {
+                isWallRide = false;
+                canWallRide = false;
+            }
         }
 
+        if (!canWallRide)
+        {
+            currentWallRideElapsedTime += Time.deltaTime;
+
+            if (currentWallRideElapsedTime >= wallRideCooldown)
+            {
+                canWallRide = true;
+                currentWallRideElapsedTime = 0f;
+            }
+        }
     }
 
     private void Gravity()
     {
-        if (velocity.y > fallBehaviorCorrection)
+        if (!isGrounded)
         {
-            isFalling = false;
-        }
-        else
-        {
-            isFalling = true;
-        }
+            if (velocity.y > fallBehaviorCorrection)
+            {
+                isFalling = false;
+            }
+            else
+            {
+                isFalling = true;
+            }
 
-        float gravityModifier;
+            float gravityModifier;
 
-        if (isWallRide && !lockGravity)
-        {
-            gravityModifier = wallRideGravityModifier;
-        }
-        else if ((verticalInput == -1f && horizontalInput == 0 && isFalling) || lockGravity)
-        {
-            gravityModifier = forceFallGravityModifier;
-            lockGravity = true;
-            canCrouch = false;
-        }
-        else if (isFalling)
-        {
-            gravityModifier = fallGravityModifier;
-        }
-        else if (!isFalling && jumpInput)
-        {
-            gravityModifier = highJumpGravityModifier;
-        }
-        else
-        {
-            gravityModifier = 1f;
-        }
+            if (isWallRide && !lockGravity)
+            {
+                gravityModifier = wallRideGravityModifier;
+            }
+            else if ((verticalInput == -1f && horizontalInput == 0 && isFalling) || lockGravity)
+            {
+                gravityModifier = forceFallGravityModifier;
+                lockGravity = true;
+                canCrouch = false;
+            }
+            else if (isFalling)
+            {
+                gravityModifier = fallGravityModifier;
+            }
+            else if (!isFalling && jumpInput)
+            {
+                gravityModifier = highJumpGravityModifier;
+            }
+            else
+            {
+                gravityModifier = 1f;
+            }
 
-        velocity.y += Physics2D.gravity.y * gravityScale * gravityModifier * Time.deltaTime;
+            velocity.y += Physics2D.gravity.y * gravityScale * gravityModifier * Time.deltaTime;
+        }
     }
 
     private void CollisionDetection()
     {
-        Collider2D[] hits = Physics2D.OverlapBoxAll(transform.position, boxCollider.size, 0);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(transform.position, boxCollider.size, 0f);
 
         foreach (Collider2D hit in hits)
         {
@@ -249,32 +278,28 @@ public class Scr_CharacterMovement : MonoBehaviour
             {
                 transform.Translate(colliderDistance.pointA - colliderDistance.pointB);
 
-                if (Vector2.Angle(colliderDistance.normal, Vector2.up) == 0 && velocity.y < 0)
+                if (Vector2.Angle(colliderDistance.normal, Vector2.up) == 0f && velocity.y < 0f && !isGrounded)
                 {
                     velocity.y = 0;
 
+                    isWallRide = false;
                     isGrounded = true;
                     isFalling = false;
                     lockGravity = false;
 
                 }
 
-                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0 && horizontalInput == -1) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0 && horizontalInput == 1)) && !isGrounded && velocity.y < 0)
+                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide)
                 {
+                    wallRideSide = horizontalInput;
+
                     if (!isWallRide)
                     {
                         velocity = Vector2.zero;
                     }
 
                     isWallRide = true;
-                    
                 }
-                else
-                {
-                    isWallRide = false;
-                }
-
-
             }
         }
     }
