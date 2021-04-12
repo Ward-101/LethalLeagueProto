@@ -63,8 +63,8 @@ public class Scr_CharacterMovement : MonoBehaviour
         Jump();
         WallRide();
         Gravity();
-        HorizontalMovement();
         Crouch();
+        HorizontalMovement();
         
         transform.Translate(velocity * Time.deltaTime);
 
