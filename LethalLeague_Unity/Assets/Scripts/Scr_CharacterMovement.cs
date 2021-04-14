@@ -18,6 +18,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     [SerializeField] private float forceFallGravityModifier = 1f;
     [SerializeField] private float wallRideGravityModifier = 1f;
     [SerializeField, Range(0f, -10f)] private float fallBehaviorCorrection = 0f;
+    [SerializeField] private LayerMask worldCollisionLayer;
 
     [Header("Inputs")]
     public float horizontalInput;
@@ -263,7 +264,7 @@ public class Scr_CharacterMovement : MonoBehaviour
 
     private void CollisionDetection()
     {
-        Collider2D[] hits = Physics2D.OverlapBoxAll(transform.position, boxCollider.size, 0f);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(transform.position, boxCollider.size, 0f, worldCollisionLayer);
 
         foreach (Collider2D hit in hits)
         {
