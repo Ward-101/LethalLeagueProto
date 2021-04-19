@@ -271,6 +271,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 52578043, guid: 61c0fa3a6f288e9469222c61033c81ff, type: 3}
+      propertyPath: m_Name
+      value: HitboxLeftLow
+      objectReference: {fileID: 0}
+    - target: {fileID: 1948708699, guid: 61c0fa3a6f288e9469222c61033c81ff, type: 3}
+      propertyPath: m_Name
+      value: HitboxRightLow
+      objectReference: {fileID: 0}
     - target: {fileID: 3636725404744890717, guid: 61c0fa3a6f288e9469222c61033c81ff,
         type: 3}
       propertyPath: m_Name

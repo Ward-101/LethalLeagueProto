@@ -2,6 +2,8 @@
 
 public class Scr_CharacterAttack : MonoBehaviour
 {
+
+    #region Variables
     [Header("Normal")]
     [SerializeField] private float normalStartupTime;
     [SerializeField] private float normalActiveTime;
@@ -21,6 +23,9 @@ public class Scr_CharacterAttack : MonoBehaviour
     [SerializeField] private float lobRecoveryTime;
     [SerializeField] private float lobActiveStartupTime;
 
+    [Header("Edit")]
+    [SerializeField] private LayerMask hitLayer;
+
     [Header("Inputs")]
     [SerializeField] private float horizontalInput;
     [SerializeField] private bool attackInput;
@@ -36,18 +41,27 @@ public class Scr_CharacterAttack : MonoBehaviour
     public bool isActive = false;
     public bool isRecovery = false;
 
-    public bool collisionIsActive = false;
+    public bool processCollision = false;
 
-    private Collider2D[] hitboxColliders;
+    private Scr_CharacterMovement movement;
+    private CapsuleCollider2D[] hitboxColliders;
     [HideInInspector] public float attackDir = 0f;
+    //private float lastHorizontalInput = 0f;
+    private bool lockNormal;
+    private bool lockSmash;
+    private bool lockLob;
+    private float currentTime;
+    //private float hitTimeScale = 1f; 
+
+    #endregion
 
     private void Awake()
     {
-        hitboxColliders = new Collider2D[transform.GetChild(0).childCount];
+        hitboxColliders = new CapsuleCollider2D[transform.GetChild(0).childCount];
 
         for (int i = 0; i < hitboxColliders.Length; i++)
         {
-            hitboxColliders[i] = transform.GetChild(0).GetChild(i).GetComponent<Collider2D>();
+            hitboxColliders[i] = transform.GetChild(0).GetChild(i).GetComponent<CapsuleCollider2D>();
         }
     }
 
@@ -64,8 +78,6 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void GetInput()
     {
-        horizontalInput = GetComponent<Scr_CharacterMovement>().horizontalInput;
-
         attackInput = Input.GetButtonDown("P1_X");
         chargeInput = Input.GetButton("P1_X");
         lobInput = Input.GetButtonDown("P1_B");
@@ -73,7 +85,7 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Normal()
     {
-
+        
     }
 
     private void Smash()
@@ -83,29 +95,84 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Lob()
     {
+        if ((lobInput && !isSmash && !isNormal) || lockLob)
+        {
+            if (isLob != false)
+            {
+                isLob = true;
+                lockLob = true;
+                isStartup = true;
+            }
 
+            currentTime += Time.deltaTime;
+
+            if (isStartup)
+            {
+                if (currentTime < lobActiveStartupTime)
+                {
+                    processCollision = true;
+                }
+                else if (currentTime < lobStartupTime)
+                {
+                    isStartup = true;
+                    processCollision = false;
+                }
+                else
+                {
+                    isStartup = false;
+                    isActive = true;
+                    currentTime = 0f;
+                }
+
+            }
+            else if (isActive)
+            {
+                if (currentTime < lobActiveTime)
+                {
+                    isActive = true;
+                    processCollision = true;
+                }
+                else
+                {
+                    isActive = false;
+                    isRecovery = true;
+                    currentTime = 0f;
+                }
+            }
+            else if (isRecovery)
+            {
+                if (currentTime > lobRecoveryTime)
+                {
+                    isRecovery = true;
+                    processCollision = false;
+                }
+                else
+                {
+                    isRecovery = false;
+                    lockLob = false;
+                    currentTime = 0f;
+                }
+            }
+        }
+        else
+        {
+            isLob = false;
+        }
     }
+
+
 
 
     private void CollisionDetection()
     {
-        if (collisionIsActive)
+        if (processCollision)
         {
-
-            if (isNormal && isSmash)
+            if (isStartup)
             {
-
+                isActive = true;
+                currentTime = normalActiveTime - normalActiveTime * 0.1f;
             }
-
-            else if (isLob)
-            {
-
-            }
-
-            else
-            {
-
-            }
+            //CapsuleCollider2D[] hits = Physics2D.OverlapCapsuleAll(hitboxColliders[1].transform.position, hitboxColliders[1].size, hitboxColliders[1].direction, 0f, hitLayer);
         }
     }
 }

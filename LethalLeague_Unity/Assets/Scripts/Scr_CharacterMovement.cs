@@ -37,6 +37,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     
     private BoxCollider2D boxCollider;
     [HideInInspector] public Vector2 velocity;
+    private Scr_CharacterAttack attack;
 
     [HideInInspector] public float lastXVelocity = 0f;
     private float lastHorizontalInput = 0f;
@@ -239,7 +240,7 @@ public class Scr_CharacterMovement : MonoBehaviour
             {
                 gravityModifier = wallRideGravityModifier;
             }
-            else if ((verticalInput == -1f && horizontalInput == 0 && isFalling) || lockGravity)
+            else if ((verticalInput == -1f && horizontalInput == 0 && isFalling && !attack.isLob && !attack.isSmash && !attack.isNormal) || lockGravity)
             {
                 gravityModifier = forceFallGravityModifier;
                 lockGravity = true;
@@ -290,7 +291,7 @@ public class Scr_CharacterMovement : MonoBehaviour
 
                 }
 
-                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide)
+                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide && !attack.isLob)
                 {
                     wallRideSide = horizontalInput;
 
