@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator), typeof(Scr_CharacterMovement))]
+[RequireComponent(typeof(Animator), typeof(Scr_CharacterMovement), typeof(Scr_CharacterAttack))]
 public class Scr_CharacterAnimations : MonoBehaviour
 {
     #region Variables
@@ -11,42 +11,49 @@ public class Scr_CharacterAnimations : MonoBehaviour
 
     private Animator animator;
     private Scr_CharacterMovement movement;
+    private Scr_CharacterAttack attack;
     #endregion
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
         movement = GetComponent<Scr_CharacterMovement>();
+        attack = GetComponent<Scr_CharacterAttack>();
     }
 
     private void Update()
     {
+        AttackAnimation();
         MovementAnimation();
     }
 
+    #region Movement
     private void MovementAnimation()
     {
-        if (movement.isIdle && movement.isGrounded)
+
+        if (!attack.isNormal && !attack.isSmash && !attack.isLob)
         {
-            Idle();
-        }
-        else if (movement.isRun && movement.isGrounded)
-        {
-            Run();
-        }
-        else if (movement.isWallRide)
-        {
-            WallRide();
-        }
-        else if (!movement.isGrounded)
-        {
-            Jump();
-        }
-        else if (movement.isCrouch)
-        {
-            Crouch();
-        }
-          
+            if (movement.isIdle && movement.isGrounded)
+            {
+                Idle();
+            }
+            else if (movement.isRun && movement.isGrounded)
+            {
+                Run();
+            }
+            else if (movement.isWallRide)
+            {
+                WallRide();
+            }
+            else if (!movement.isGrounded)
+            {
+                Jump();
+            }
+            else if (movement.isCrouch)
+            {
+                Crouch();
+            }
+        }   
     }
 
     private void Idle()
@@ -170,5 +177,82 @@ public class Scr_CharacterAnimations : MonoBehaviour
         {
             animator.Play("ACl_PlayerWallRide");
         }
+    }
+    #endregion
+
+    private void AttackAnimation()
+    {
+        if (attack.isNormal && !attack.isSmash && !attack.isLob)
+        {
+            Normal();
+        }
+        else if (attack.isSmash && !attack.isNormal && !attack.isLob)
+        {
+            Smash();
+        }
+        else if (attack.isLob && !attack.isNormal && !attack.isSmash)
+        {
+            Lob();
+        }
+    }
+
+    private void Normal()
+    {
+   
+    }
+
+    private void Smash()
+    {
+
+    }
+
+    private void Lob()
+    {
+        if (attack.isStartup)
+        {
+            if (attack.attackDir > 0f)
+            {
+                animator.Play("ACl_PlayerLobStartup");
+            }
+            else if (attack.attackDir < 0f)
+            {
+                animator.Play("ACl_PlayerLobStartupFlip");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerLobStartup");
+            }
+        }
+        else if (attack.isActive)
+        {
+            if (attack.attackDir > 0f)
+            {
+                animator.Play("ACl_PlayerLobActive");
+            }
+            else if (attack.attackDir < 0f)
+            {
+                animator.Play("ACl_PlayerLobActiveFlip");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerLobActive");
+            }
+        }
+        else if (attack.isRecovery)
+        {
+            if (attack.attackDir > 0f)
+            {
+                animator.Play("ACl_PlayerLobRecovery");
+            }
+            else if (attack.attackDir < 0f)
+            {
+                animator.Play("ACl_PlayerLobRecoveryFlip");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerLobRecovery");
+            }
+        }
+       
     }
 }

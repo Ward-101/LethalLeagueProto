@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(BoxCollider2D), typeof(Scr_CharacterAttack))]
 public class Scr_CharacterMovement : MonoBehaviour
 {
     #region Variables
     [Header("Edit")]
-    [SerializeField] private float speed = 9f;
+    [SerializeField] private float horizontalMoveSpeed = 9f;
     [SerializeField] private float crouchMinDuration = 0.2f;
     [SerializeField] private float slideDeceleration = 70f;
     [SerializeField] private float jumpHeight = 4f;
@@ -40,7 +40,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     private Scr_CharacterAttack attack;
 
     [HideInInspector] public float lastXVelocity = 0f;
-    private float lastHorizontalInput = 0f;
+    [HideInInspector] public float lastHorizontalInput = 0f;
 
     private bool lockGravity = false;
     private bool lockCrouch = false;
@@ -56,6 +56,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     private void Awake()
     {
         boxCollider = GetComponent<BoxCollider2D>();
+        attack = GetComponent<Scr_CharacterAttack>();
     }
 
     private void Update()
@@ -108,9 +109,12 @@ public class Scr_CharacterMovement : MonoBehaviour
         wallJumpInput = Input.GetButtonDown("P1_A");
     }
 
+    /// <summary>
+    /// Cet état s'applique quand l'avatar ne performe aucune action
+    /// </summary>
     private void Idle()
     {
-        if (!isRun && !isCrouch && !isWallRide && !isWallJump && !isFalling)
+        if (!isRun && !isCrouch && !isWallRide && !isWallJump && !isFalling && !attack.isNormal && !attack.isSmash && !attack.isLob)
         {
             isIdle = true;
             velocity.x = 0f;
@@ -121,12 +125,15 @@ public class Scr_CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gère l'ensemble des mouvements horizontaux qu'il soit fait au sol ou en l'air
+    /// </summary>
     private void HorizontalMovement()
     {
         if (!isCrouch && !isWallRide && !isWallJump && horizontalInput != 0)
         {
             isRun = true;
-            velocity.x = speed * horizontalInput;
+            velocity.x = horizontalMoveSpeed * horizontalInput;
             lastXVelocity = velocity.x;
         }
         else
@@ -288,7 +295,6 @@ public class Scr_CharacterMovement : MonoBehaviour
                     isGrounded = true;
                     isFalling = false;
                     lockGravity = false;
-
                 }
 
                 if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide && !attack.isLob)

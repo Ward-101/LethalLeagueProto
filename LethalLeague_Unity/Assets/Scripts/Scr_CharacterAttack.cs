@@ -27,10 +27,10 @@ public class Scr_CharacterAttack : MonoBehaviour
     [SerializeField] private LayerMask hitLayer;
 
     [Header("Inputs")]
-    [SerializeField] private float horizontalInput;
-    [SerializeField] private bool attackInput;
-    [SerializeField] private bool chargeInput;
-    [SerializeField] private bool lobInput;
+    [SerializeField] private float horizontalInput = 0f;
+    [SerializeField] private bool attackInput = false;
+    [SerializeField] private bool chargeInput = false;
+    [SerializeField] private bool lobInput = false;
 
     [Header("States")]
     public bool isNormal = false;
@@ -46,7 +46,6 @@ public class Scr_CharacterAttack : MonoBehaviour
     private Scr_CharacterMovement movement;
     private CapsuleCollider2D[] hitboxColliders;
     [HideInInspector] public float attackDir = 0f;
-    //private float lastHorizontalInput = 0f;
     private bool lockNormal;
     private bool lockSmash;
     private bool lockLob;
@@ -57,6 +56,8 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Awake()
     {
+        movement = GetComponent<Scr_CharacterMovement>();
+
         hitboxColliders = new CapsuleCollider2D[transform.GetChild(0).childCount];
 
         for (int i = 0; i < hitboxColliders.Length; i++)
@@ -73,7 +74,7 @@ public class Scr_CharacterAttack : MonoBehaviour
         Smash();
         Lob();
 
-        CollisionDetection();
+        //CollisionDetection();
     }
 
     private void GetInput()
@@ -95,13 +96,21 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Lob()
     {
+        
         if ((lobInput && !isSmash && !isNormal) || lockLob)
         {
-            if (isLob != false)
+            if (!isLob)
             {
                 isLob = true;
                 lockLob = true;
                 isStartup = true;
+
+                attackDir = movement.horizontalInput;
+
+                if (movement.isGrounded)
+                {
+                    movement.velocity.x = 0f;
+                }
             }
 
             currentTime += Time.deltaTime;
@@ -114,7 +123,6 @@ public class Scr_CharacterAttack : MonoBehaviour
                 }
                 else if (currentTime < lobStartupTime)
                 {
-                    isStartup = true;
                     processCollision = false;
                 }
                 else
@@ -141,7 +149,7 @@ public class Scr_CharacterAttack : MonoBehaviour
             }
             else if (isRecovery)
             {
-                if (currentTime > lobRecoveryTime)
+                if (currentTime < lobRecoveryTime)
                 {
                     isRecovery = true;
                     processCollision = false;
