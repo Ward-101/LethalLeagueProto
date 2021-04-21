@@ -37,7 +37,7 @@ public class Scr_CharacterAnimations : MonoBehaviour
             {
                 Idle();
             }
-            else if (movement.isRun && movement.isGrounded)
+            else if (movement.isHorizontalMovement && movement.isGrounded)
             {
                 Run();
             }
@@ -58,17 +58,13 @@ public class Scr_CharacterAnimations : MonoBehaviour
 
     private void Idle()
     {
-        if (movement.lastXVelocity > 0f)
+        if (movement.lastXVelocity >= 0f)
         {
             animator.Play("ACl_PlayerIdle");
-        }
-        else if (movement.lastXVelocity < 0)
-        {
-            animator.Play("ACl_PlayerIdleFlip");
         }
         else
         {
-            animator.Play("ACl_PlayerIdle");
+            animator.Play("ACl_PlayerIdleFlip");
         }
     }
 
@@ -96,18 +92,15 @@ public class Scr_CharacterAnimations : MonoBehaviour
         }
         else
         {
-            if (movement.lastXVelocity > 0f)
+            if (movement.lastXVelocity >= 0f)
             {
                 animator.Play("ACl_PlayerCrouch");
-            }
-            else if (movement.lastXVelocity < 0f)
-            {
-                animator.Play("ACl_PlayerCrouchFlip");
             }
             else
             {
-                animator.Play("ACl_PlayerCrouch");
+                animator.Play("ACl_PlayerCrouchFlip");
             }
+
         }
     }
 
@@ -125,18 +118,15 @@ public class Scr_CharacterAnimations : MonoBehaviour
             }
             else
             {
-                if (movement.lastXVelocity > 0f)
+                if (movement.lastXVelocity >= 0f)
                 {
                     animator.Play("ACl_PlayerJump");
-                }
-                else if (movement.lastXVelocity < 0f)
-                {
-                    animator.Play("ACl_PlayerJumpFlip");
                 }
                 else
                 {
-                    animator.Play("ACl_PlayerJump");
+                    animator.Play("ACl_PlayerJumpFlip");
                 }
+
             }
         }
         else
@@ -151,17 +141,13 @@ public class Scr_CharacterAnimations : MonoBehaviour
             }
             else
             {
-                if (movement.lastXVelocity > 0f)
+                if (movement.lastXVelocity >= 0f)
                 {
                     animator.Play("ACl_PlayerFall");
-                }
-                else if (movement.lastXVelocity < 0f)
-                {
-                    animator.Play("ACl_PlayerFallFlip");
                 }
                 else
                 {
-                    animator.Play("ACl_PlayerFall");
+                    animator.Play("ACl_PlayerFallFlip");
                 }
             }
         }
@@ -203,55 +189,79 @@ public class Scr_CharacterAnimations : MonoBehaviour
 
     private void Smash()
     {
+        if (attack.isStartup)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerSmashStartup");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerSmashStartupFlip");
+            }
+        }
+        else if (attack.isActive)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerSmashActive");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerSmashActiveFlip");
+            }
 
+        }
+        else if (attack.isRecovery)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerSmashRecovery");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerSmashRecoveryFlip");
+            }
+
+        }
     }
 
     private void Lob()
     {
         if (attack.isStartup)
         {
-            if (attack.attackDir > 0f)
+            if (attack.attackDir >= 0f)
             {
                 animator.Play("ACl_PlayerLobStartup");
-            }
-            else if (attack.attackDir < 0f)
-            {
-                animator.Play("ACl_PlayerLobStartupFlip");
             }
             else
             {
-                animator.Play("ACl_PlayerLobStartup");
+                animator.Play("ACl_PlayerLobStartupFlip");
             }
         }
         else if (attack.isActive)
         {
-            if (attack.attackDir > 0f)
+            if (attack.attackDir >= 0f)
             {
                 animator.Play("ACl_PlayerLobActive");
             }
-            else if (attack.attackDir < 0f)
+            else
             {
                 animator.Play("ACl_PlayerLobActiveFlip");
             }
-            else
-            {
-                animator.Play("ACl_PlayerLobActive");
-            }
+
         }
         else if (attack.isRecovery)
         {
-            if (attack.attackDir > 0f)
+            if (attack.attackDir >= 0f)
             {
                 animator.Play("ACl_PlayerLobRecovery");
-            }
-            else if (attack.attackDir < 0f)
-            {
-                animator.Play("ACl_PlayerLobRecoveryFlip");
             }
             else
             {
-                animator.Play("ACl_PlayerLobRecovery");
+                animator.Play("ACl_PlayerLobRecoveryFlip");
             }
+
         }
        
     }

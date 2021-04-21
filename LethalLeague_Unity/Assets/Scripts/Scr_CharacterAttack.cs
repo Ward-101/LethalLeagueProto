@@ -27,7 +27,6 @@ public class Scr_CharacterAttack : MonoBehaviour
     [SerializeField] private LayerMask hitLayer;
 
     [Header("Inputs")]
-    [SerializeField] private float horizontalInput = 0f;
     [SerializeField] private bool attackInput = false;
     [SerializeField] private bool chargeInput = false;
     [SerializeField] private bool lobInput = false;
@@ -45,6 +44,7 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private Scr_CharacterMovement movement;
     private CapsuleCollider2D[] hitboxColliders;
+    private CapsuleCollider2D selectedHitbox = null;
     [HideInInspector] public float attackDir = 0f;
     private bool lockNormal;
     private bool lockSmash;
@@ -74,7 +74,7 @@ public class Scr_CharacterAttack : MonoBehaviour
         Smash();
         Lob();
 
-        //CollisionDetection();
+        CollisionDetection();
     }
 
     private void GetInput()
@@ -91,26 +91,131 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Smash()
     {
+        if ((attackInput && !isNormal && !isLob && !movement.isGrounded && movement.horizontalInput != 0 && !movement.isWallRide) || lockSmash)
+        {
+            //Ce joue une seul fois au début du l'attaque
+            if (!isSmash)
+            {
+                isSmash = true;
+                lockSmash = true;
+                isStartup = true;
 
+                //Need des comments du cette partie parce que c'est pas clair du tout
+                if (!movement.isWallRide && !movement.isWallJump)
+                {
+                    attackDir = movement.lastXVelocity;
+                }
+                else
+                {
+                    attackDir = -movement.lastXVelocity;
+                }
+
+            }
+
+            if (movement.isGrounded)
+            {
+                movement.canHorizontalMovement = false;
+                movement.velocity.x = 0f;
+            }
+            else
+            {
+                movement.canHorizontalMovement = true;
+            }
+
+            currentTime += Time.deltaTime;
+
+            if (isStartup)
+            {
+                if (currentTime < smashActiveStartupTime)
+                {
+                    processCollision = true;
+                }
+                else if (currentTime < smashStartupTime)
+                {
+                    processCollision = false;
+                }
+                else
+                {
+                    isStartup = false;
+                    isActive = true;
+                    currentTime = 0f;
+                }
+
+            }
+            else if (isActive)
+            {
+                if (currentTime < smashActiveTime)
+                {
+                    isActive = true;
+                    processCollision = true;
+                }
+                else
+                {
+                    isActive = false;
+                    isRecovery = true;
+                    currentTime = 0f;
+                }
+            }
+            else if (isRecovery)
+            {
+                if (currentTime < smashRecoveryTime)
+                {
+                    isRecovery = true;
+                    processCollision = false;
+                }
+                else
+                {
+                    isRecovery = false;
+                    lockSmash = false;
+                    movement.canHorizontalMovement = true;
+                    currentTime = 0f;
+                }
+            }
+        }
+        else
+        {
+            isSmash = false;
+        }
     }
 
     private void Lob()
     {
-        
         if ((lobInput && !isSmash && !isNormal) || lockLob)
         {
+            //Ce joue une seul fois au début du l'attaque
             if (!isLob)
             {
                 isLob = true;
                 lockLob = true;
                 isStartup = true;
 
-                attackDir = movement.horizontalInput;
-
-                if (movement.isGrounded)
+                //Need des comments du cette partie parce que c'est pas clair du tout
+                if (movement.velocity.x != 0)
                 {
-                    movement.velocity.x = 0f;
+                    if (!movement.isWallRide && !movement.isWallJump)
+                    {
+                        attackDir = movement.lastXVelocity;
+                    }
+                    else
+                    {
+                        attackDir = -movement.lastXVelocity;
+                    }
                 }
+                else
+                {
+                    attackDir = movement.lastXVelocity;
+                }
+
+            }
+
+            if (movement.isGrounded)
+            {
+                movement.canHorizontalMovement = false;
+                movement.velocity.x = 0f;
+            }
+            else
+            {
+                movement.canHorizontalMovement = true;
             }
 
             currentTime += Time.deltaTime;
@@ -158,6 +263,7 @@ public class Scr_CharacterAttack : MonoBehaviour
                 {
                     isRecovery = false;
                     lockLob = false;
+                    movement.canHorizontalMovement = true;
                     currentTime = 0f;
                 }
             }
@@ -168,19 +274,51 @@ public class Scr_CharacterAttack : MonoBehaviour
         }
     }
 
-
-
-
     private void CollisionDetection()
     {
         if (processCollision)
         {
-            if (isStartup)
+            //Choisi la capsule prit en référence pour le CapsuleOverlapAll
+            if (isNormal || isSmash)
             {
-                isActive = true;
-                currentTime = normalActiveTime - normalActiveTime * 0.1f;
+                if (attackDir >= 0f)
+                {
+                    selectedHitbox = hitboxColliders[0];
+                }
+                else
+                {
+                    selectedHitbox = hitboxColliders[1];
+                }
             }
-            //CapsuleCollider2D[] hits = Physics2D.OverlapCapsuleAll(hitboxColliders[1].transform.position, hitboxColliders[1].size, hitboxColliders[1].direction, 0f, hitLayer);
+            else if (isLob)
+            {
+                if (attackDir >= 0f)
+                {
+                    selectedHitbox = hitboxColliders[2];
+                }
+                else
+                {
+                    selectedHitbox = hitboxColliders[3];
+                }
+            }
+
+            Collider2D[] hits = Physics2D.OverlapCapsuleAll(selectedHitbox.transform.position, selectedHitbox.size, selectedHitbox.direction, 0f, hitLayer);
+
+
+            //foreach (collider2d hit in hits)
+            //{
+            //    debug.log("oui");
+
+            //    if (isstartup)
+            //    {
+            //        isstartup = false;
+            //        currenttime = 0f;
+            //        isactive = true;
+            //    }
+            //}
+
+               
+
         }
     }
 }

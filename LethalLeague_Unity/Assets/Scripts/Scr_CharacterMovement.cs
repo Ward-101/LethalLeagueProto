@@ -8,6 +8,8 @@ public class Scr_CharacterMovement : MonoBehaviour
     [SerializeField] private float horizontalMoveSpeed = 9f;
     [SerializeField] private float crouchMinDuration = 0.2f;
     [SerializeField] private float slideDeceleration = 70f;
+    [SerializeField] private float airAcceleration = 90f;
+    [SerializeField] private float airDeceleration = 50f;
     [SerializeField] private float jumpHeight = 4f;
     [SerializeField] private Vector2 wallJumpForce = new Vector2(3f, 3f);
     [SerializeField] private float wallJumpDuration = 0.5f;
@@ -30,7 +32,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     public bool isGrounded;
     public bool isFalling;
     public bool isIdle;
-    public bool isRun;
+    public bool isHorizontalMovement;
     public bool isCrouch;
     public bool isWallRide;
     public bool isWallJump;
@@ -46,6 +48,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     private bool lockCrouch = false;
     private bool canCrouch = true;
     private bool canWallRide = true;
+    [HideInInspector] public bool canHorizontalMovement = true;
 
     private float currentCrouchTime = 0f;
     private float currentWallJumpTime = 0f;
@@ -114,10 +117,19 @@ public class Scr_CharacterMovement : MonoBehaviour
     /// </summary>
     private void Idle()
     {
-        if (!isRun && !isCrouch && !isWallRide && !isWallJump && !isFalling && !attack.isNormal && !attack.isSmash && !attack.isLob)
+        if (!isHorizontalMovement && !isCrouch && !isWallRide && !isWallJump && !isFalling && !attack.isNormal && !attack.isSmash && !attack.isLob)
         {
             isIdle = true;
-            velocity.x = 0f;
+
+            if (isGrounded)
+            {
+                velocity.x = 0f;
+            }
+            else
+            {
+                velocity.x = Mathf.MoveTowards(velocity.x, 0f, airDeceleration * Time.deltaTime);
+            }
+            
         }
         else
         {
@@ -130,15 +142,24 @@ public class Scr_CharacterMovement : MonoBehaviour
     /// </summary>
     private void HorizontalMovement()
     {
-        if (!isCrouch && !isWallRide && !isWallJump && horizontalInput != 0)
+        if (!isCrouch && !isWallRide && !isWallJump && horizontalInput != 0 && canHorizontalMovement)
         {
-            isRun = true;
-            velocity.x = horizontalMoveSpeed * horizontalInput;
+            isHorizontalMovement = true;
+
+            if (isGrounded)
+            {
+                velocity.x = horizontalMoveSpeed * horizontalInput;
+            }
+            else
+            {
+                velocity.x = Mathf.MoveTowards(velocity.x, horizontalMoveSpeed * horizontalInput, airAcceleration * Time.deltaTime);
+            }
+            
             lastXVelocity = velocity.x;
         }
         else
         {
-            isRun = false;
+            isHorizontalMovement = false;
         }
     }
 
@@ -209,7 +230,7 @@ public class Scr_CharacterMovement : MonoBehaviour
     {
         if (isWallRide)
         {
-            if (wallRideSide != horizontalInput)
+            if (wallRideSide != horizontalInput || attack.isNormal || attack.isSmash || attack.isLob)
             {
                 isWallRide = false;
                 canWallRide = false;
