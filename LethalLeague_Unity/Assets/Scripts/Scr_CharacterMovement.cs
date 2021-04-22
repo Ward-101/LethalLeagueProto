@@ -197,7 +197,7 @@ public class Scr_CharacterMovement : MonoBehaviour
         {
             velocity.y = 0;
 
-            if (jumpInput && !isCrouch)
+            if (jumpInput && !isCrouch && !attack.isNormal)
             {
                 isGrounded = false;
                 velocity.y = Mathf.Sqrt(2 * jumpHeight * Mathf.Abs(Physics2D.gravity.y * gravityScale));
@@ -318,7 +318,8 @@ public class Scr_CharacterMovement : MonoBehaviour
                     lockGravity = false;
                 }
 
-                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide && !attack.isLob)
+                if (((Vector2.Angle(colliderDistance.normal, Vector2.right) == 0f && horizontalInput == -1f) || (Vector2.Angle(colliderDistance.normal, Vector2.left) == 0f && horizontalInput == 1f)) 
+                    && !isGrounded && velocity.y < 0f && !isWallRide && canWallRide && !attack.isLob && !attack.isNormal)
                 {
                     wallRideSide = horizontalInput;
 

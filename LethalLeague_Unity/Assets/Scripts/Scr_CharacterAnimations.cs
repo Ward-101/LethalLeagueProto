@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Animator), typeof(Scr_CharacterMovement), typeof(Scr_CharacterAttack))]
 public class Scr_CharacterAnimations : MonoBehaviour
@@ -166,6 +164,7 @@ public class Scr_CharacterAnimations : MonoBehaviour
     }
     #endregion
 
+    #region Attack
     private void AttackAnimation()
     {
         if (attack.isNormal && !attack.isSmash && !attack.isLob)
@@ -184,7 +183,40 @@ public class Scr_CharacterAnimations : MonoBehaviour
 
     private void Normal()
     {
-   
+        if (attack.isStartup)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerNormalStartup");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerNormalStartupFlip");
+            }
+        }
+        else if (attack.isActive)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerNormalActive");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerNormalActiveFlip");
+            }
+
+        }
+        else if (attack.isRecovery)
+        {
+            if (attack.attackDir >= 0f)
+            {
+                animator.Play("ACl_PlayerNormalRecovery");
+            }
+            else
+            {
+                animator.Play("ACl_PlayerNormalRecoveryFlip");
+            }
+        }
     }
 
     private void Smash()
@@ -265,4 +297,5 @@ public class Scr_CharacterAnimations : MonoBehaviour
         }
        
     }
+#endregion
 }

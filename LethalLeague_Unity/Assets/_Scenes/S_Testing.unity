@@ -478,7 +478,7 @@ PrefabInstance:
     - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
         type: 3}
       propertyPath: lobStartupTime
-      value: 0.23
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
         type: 3}
@@ -492,6 +492,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
         type: 3}
+      propertyPath: normalActiveTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
       propertyPath: smashStartupTime
       value: 0.23
       objectReference: {fileID: 0}
@@ -502,7 +507,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
         type: 3}
+      propertyPath: normalRecoveryTime
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
+      propertyPath: maxNormalStartupTime
+      value: 0.54
+      objectReference: {fileID: 0}
+    - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
+      propertyPath: minNormalStartupTime
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
       propertyPath: smashActiveStartupTime
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 749274409714049497, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
+      propertyPath: normalActiveStartupTime
       value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 3636725404744890717, guid: 61c0fa3a6f288e9469222c61033c81ff,

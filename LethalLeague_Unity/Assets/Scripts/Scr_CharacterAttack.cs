@@ -5,11 +5,11 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     #region Variables
     [Header("Normal")]
-    [SerializeField] private float normalStartupTime;
+    [SerializeField] private float maxNormalStartupTime;
+    [SerializeField] private float minNormalStartupTime;
     [SerializeField] private float normalActiveTime;
     [SerializeField] private float normalRecoveryTime;
     [SerializeField] private float normalActiveStartupTime;
-    [SerializeField] private float timeBeforeLockDirection;
 
     [Header("Smash")]
     [SerializeField] private float smashStartupTime;
@@ -86,12 +86,106 @@ public class Scr_CharacterAttack : MonoBehaviour
 
     private void Normal()
     {
-        
+        if ((attackInput && !isSmash && !isLob && movement.isGrounded) || (attackInput && !isSmash && !isLob && movement.horizontalInput == 0f && !movement.isGrounded) || 
+            (attackInput && !isSmash && !isLob && movement.isWallRide) || lockNormal)
+        {
+            //Ce joue une seul fois au début du l'attaque
+            if (!isNormal)
+            {
+                isNormal = true;
+                lockNormal = true;
+                isStartup = true;
+
+                //Need des comments du cette partie parce que c'est pas clair du tout
+                if (!movement.isWallRide && !movement.isWallJump)
+                {
+                    attackDir = movement.lastXVelocity;
+                }
+                else
+                {
+                    attackDir = -movement.lastXVelocity;
+                }
+            }
+
+            if (movement.isGrounded)
+            {
+                movement.canHorizontalMovement = false;
+
+                if (!movement.isCrouch)
+                {
+                    movement.velocity.x = 0f;
+                }
+            }
+            else
+            {
+                movement.canHorizontalMovement = true;
+            }
+
+            currentTime += Time.deltaTime;
+
+            if (isStartup)
+            {
+                if (currentTime < normalActiveStartupTime)
+                {
+                    processCollision = true;
+                }
+                else if ((currentTime < maxNormalStartupTime && chargeInput) || (currentTime < minNormalStartupTime))
+                {
+                    processCollision = false;
+                }
+                else
+                {
+                    isStartup = false;
+                    isActive = true;
+                    currentTime = 0f;
+                }
+
+                if (movement.isGrounded && movement.horizontalInput != 0f)
+                {
+                    attackDir = movement.horizontalInput;
+                }
+
+            }
+            else if (isActive)
+            {
+                if (currentTime < normalActiveTime)
+                {
+                    isActive = true;
+                    processCollision = true;
+                }
+                else
+                {
+                    isActive = false;
+                    isRecovery = true;
+                    currentTime = 0f;
+                }
+            }
+            else if (isRecovery)
+            {
+                if (currentTime < normalRecoveryTime)
+                {
+                    isRecovery = true;
+                    processCollision = false;
+                }
+                else
+                {
+                    isRecovery = false;
+                    lockNormal = false;
+                    movement.canHorizontalMovement = true;
+                    currentTime = 0f;
+                }
+            }
+
+        }
+        else
+        {
+            isNormal = false;
+        }
     }
 
     private void Smash()
     {
-        if ((attackInput && !isNormal && !isLob && !movement.isGrounded && movement.horizontalInput != 0 && !movement.isWallRide) || lockSmash)
+        if ((attackInput && !isNormal && !isLob && !movement.isGrounded && movement.horizontalInput != 0f && !movement.isWallRide) || lockSmash)
         {
             //Ce joue une seul fois au début du l'attaque
             if (!isSmash)
