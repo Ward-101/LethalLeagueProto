@@ -130,7 +130,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 42124727}
-  - component: {fileID: 42124726}
   - component: {fileID: 42124729}
   - component: {fileID: 42124728}
   m_Layer: 11
@@ -140,22 +139,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!58 &42124726
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 42124725}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.00000044703484, y: 0}
-  serializedVersion: 2
-  m_Radius: 1.4757199
 --- !u!4 &42124727
 Transform:
   m_ObjectHideFlags: 0
@@ -164,7 +147,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42124725}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.05, y: 1.1, z: -0.84692496}
+  m_LocalPosition: {x: -0.05, y: 1.1, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -182,6 +165,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80e19d538ef1f6a448323bd87d367e35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ballBaseSpeed: 6
+  raycastHitLayer:
+    serializedVersion: 2
+    m_Bits: 4096
+  shouldMove: 0
+  directionVec: {x: 0, y: 0}
+  ballCurrentSpeed: 0
 --- !u!212 &42124729
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -313,6 +303,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 168251566545072613, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 168251566555890725, guid: d4fe5815187dc8f4599a432084215825,
         type: 3}
       propertyPath: m_Name
@@ -372,6 +367,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 168251567734385581, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 168251567957451834, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Name
+      value: Wall_Left
+      objectReference: {fileID: 0}
+    - target: {fileID: 168251567957451834, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 168251568095958049, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Name
+      value: Wall_Right
+      objectReference: {fileID: 0}
+    - target: {fileID: 168251568095958049, guid: d4fe5815187dc8f4599a432084215825,
+        type: 3}
+      propertyPath: m_Layer
+      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d4fe5815187dc8f4599a432084215825, type: 3}
@@ -599,6 +619,11 @@ PrefabInstance:
         type: 3}
       propertyPath: airDeceleration
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 3636725404744890786, guid: 61c0fa3a6f288e9469222c61033c81ff,
+        type: 3}
+      propertyPath: worldCollisionLayer.m_Bits
+      value: 4101
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61c0fa3a6f288e9469222c61033c81ff, type: 3}

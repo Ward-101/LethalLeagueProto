@@ -22,13 +22,13 @@ public class Scr_CharacterMovement : MonoBehaviour
     [SerializeField, Range(0f, -10f)] private float fallBehaviorCorrection = 0f;
     [SerializeField] private LayerMask worldCollisionLayer;
 
-    [Header("Inputs")]
+    [Header("Inputs : DON'T TOUCH")]
     public float horizontalInput;
     [SerializeField] private bool jumpInput;
     [SerializeField] private bool wallJumpInput;
     [SerializeField] private float verticalInput;
 
-    [Header("States")]
+    [Header("States : DON'T TOUCH")]
     public bool isGrounded;
     public bool isFalling;
     public bool isIdle;

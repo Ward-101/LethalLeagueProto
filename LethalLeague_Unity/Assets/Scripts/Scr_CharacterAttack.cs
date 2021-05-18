@@ -26,12 +26,12 @@ public class Scr_CharacterAttack : MonoBehaviour
     [Header("Edit")]
     [SerializeField] private LayerMask hitLayer;
 
-    [Header("Inputs")]
+    [Header("Inputs : DON'T TOUCH")]
     [SerializeField] private bool attackInput = false;
     [SerializeField] private bool chargeInput = false;
     [SerializeField] private bool lobInput = false;
 
-    [Header("States")]
+    [Header("States : DON'T TOUCH")]
     public bool isNormal = false;
     public bool isSmash = false;
     public bool isLob = false;
